@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Floating Cards</title>
+<style>
+	{
+	 margin: 0px;
+	 box-shadow: inset 0 0 100px rgba(0,0,0,0.9);
+	 background: radial-gradient(circle at 50% 0%,#e1e1e1 10%,#555);
+	 height: 100%;
+	 width: 100%;
+	 overflow-x: hidden;
+	}
+
+	body {
+	 margin: 0px;
+	 height: 100%;
+	 width: 100%;
+	 overflow-x: hidden;
+	}
+
+	H3 {
+		margin: 45px 0 0;
+		text-align: right;
+		transform:  rotate(-10deg);
+	}
+    .card {
+        position: absolute;
+		width: 150px;
+        height: 200px;
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+		box-shadow: 0 0 8px rgba(0,0,0,0.2), inset 0 0 300px rgba(222,198,122,0.7);
+        transform-style: preserve-3d;
+        cursor: grab;
+        transition: transform 0.5s ease;
+		overflow: hidden; /* Ensure the image fits within the card */
+        user-select: none; /* Prevent text selection */
+    }
+	 .card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Ensure the image covers the entire card */
+	}
+	.card:before, .card:after {
+    content: "";
+    background: #fafafa;
+    box-shadow: 0 0 8px rgba(0,0,0,0.2), inset 0 0 300px rgba(222,198,122,0.7);
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    z-index: -2;
+    transition: .5s;
+	}
+
+	.card:before {
+		left: -5px;
+		top: 2px;  
+		transform: rotate(-1.5deg);
+	}
+
+	.card:after {
+		right: -3px;
+		top: 0px;
+		transform: rotate(2.4deg);
+	}
+
+	.card:hover:before {
+	transform: rotate(0deg);
+	border: solid rgba(111,99,61,0.4);
+	border-width: 0px 0px 0px 1px;
+	left: -6px;
+	top: -6px; 
+	}
+
+	.card:hover:after {
+	transform: rotate(0deg);
+	border: solid rgba(111,99,61,0.4);
+	border-width: 0px 0px 0px 1px;
+	right: 3px;
+	top: -3px;
+	}
+    .flipped {
+        transform: rotateY;
+    }
+
+    .rotate-button {
+        position: absolute;
+        bottom: 5px;
+        left: 40%;
+        cursor: pointer;
+        font-size: 12px;
+        padding: 5px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+</style>
+</head>
+<body>
+<div class="card" id="card1" style="left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(90deg);">
+    <img src="image1.png" alt="Image 1">
+    <div class="rotate-button" onclick="rotateCard('card1')">O</div>
+</div>
+<!-- Repeat the same structure for other cards -->
+<div class="card" id="card2" style="left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(<?php echo rand(80, 110); ?>deg);">Custom Message 2
+	<div class="rotate-button" onclick="rotateCard('card2')">O</div>
+</div>
+<div class="card" id="card3" style="left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(<?php echo rand(80, 110); ?>deg);">Custom Message 3
+	<div class="rotate-button" onclick="rotateCard('card3')">O</div>
+</div>
+<div class="card" id="card4" style="left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(<?php echo rand(80, 110); ?>deg);">Custom Message 4
+	<div class="rotate-button" onclick="rotateCard('card4')">O</div>
+</div>
+<div class="card" id="card5" style="left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(<?php echo rand(80, 110); ?>deg);">Custom Message 5
+	<div class="rotate-button" onclick="rotateCard('card5')">O</div>
+</div>
+<div class="card" id="card6" style="left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(<?php echo rand(80, 110); ?>deg);">Custom Message 6
+	<div class="rotate-button" onclick="rotateCard('card6')">O </div>
+</div>
+<script>
+	// Function to generate a random rotation angle between 60 and 120 degrees
+    function getRandomRotation() {
+        return Math.floor(Math.random() * (80 - 100 + 1)) + 10;
+    }
+
+    // Apply random rotation to each card upon page load
+    document.querySelectorAll('.card').forEach(card => {
+        const rotation = getRandomRotation();
+        card.style.transform = `rotate(${rotation}deg)`;
+    });
+
+    let activeCard = null;
+
+    document.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('mousedown', function(event) {
+            activeCard = card;
+            card.style.cursor = 'grabbing';
+            // Set z-index to the maximum value among all cards
+            document.querySelectorAll('.card').forEach(c => {
+                c.style.zIndex = 1;
+            });
+            card.style.zIndex = 9999;
+        });
+
+        card.addEventListener('mouseup', function(event) {
+            activeCard = null;
+            card.style.cursor = 'grab';
+        });
+
+        card.addEventListener('dblclick', function(event) {
+            card.classList.toggle('flipped');
+        });
+    });
+
+    document.addEventListener('mousemove', function(event) {
+        if (activeCard) {
+            const rect = activeCard.getBoundingClientRect();
+            const offsetX = event.clientX - rect.width / 2;
+            const offsetY = event.clientY - rect.height / 2;
+            const maxX = window.innerWidth - rect.width;
+            const maxY = window.innerHeight - rect.height;
+            const posX = Math.min(Math.max(offsetX, 0), maxX);
+            const posY = Math.min(Math.max(offsetY, 0), maxY);
+            activeCard.style.left = posX + 'px';
+            activeCard.style.top = posY + 'px';
+        }
+    });
+
+    function rotateCard(cardId) {
+        const card = document.getElementById(cardId);
+        const currentRotation = parseInt(card.style.transform.replace('rotate(', '').replace('deg)', ''));
+        const newRotation = 0; // Rotate by 90 degrees
+        card.style.transform = `rotate(${newRotation}deg)`;
+    }
+</script>
+</body>
+</html>
